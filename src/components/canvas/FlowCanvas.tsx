@@ -134,18 +134,34 @@ function CanvasInner() {
     [tryAddEdge, toast, clearConnectionError],
   );
 
-  const isValidConnection: IsValidConnection = useCallback(
-    (conn) => {
-      if (!conn.source || !conn.target) return false;
-      return checkConnection(
+  const isValidConnection: IsValidConnection = useCallback((conn) => {
+    if (!conn.source || !conn.target) return false;
+    return checkConnection(
+      useProjectStore.getState().project.graph,
+      conn.source,
+      conn.sourceHandle ?? 'out',
+      conn.target,
+      conn.targetHandle ?? 'in',
+    ).ok;
+  }, []);
+
+  // When a drag ends on a handle that was refused, explain why.
+  const onConnectEnd = useCallback(
+    (_event: unknown, connectionState: { isValid: boolean | null; fromHandle?: unknown; toHandle?: { nodeId?: string | null; id?: string | null } | null; fromNode?: { id?: string } | null }) => {
+      if (connectionState.isValid !== false) return;
+      const to = connectionState.toHandle;
+      const fromNode = connectionState.fromNode;
+      if (!to?.nodeId || !fromNode?.id) return;
+      const check = checkConnection(
         useProjectStore.getState().project.graph,
-        conn.source,
-        conn.sourceHandle ?? 'out',
-        conn.target,
-        conn.targetHandle ?? 'in',
-      ).ok;
+        fromNode.id,
+        'out',
+        to.nodeId,
+        to.id ?? 'in',
+      );
+      if (!check.ok && check.reason) toast('warn', check.reason);
     },
-    [],
+    [toast],
   );
 
   const onDrop = useCallback(
@@ -168,6 +184,7 @@ function CanvasInner() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectEnd={onConnectEnd}
         isValidConnection={isValidConnection}
         onNodeDragStop={() => {
           dragMoved.current = false;

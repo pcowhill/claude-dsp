@@ -116,6 +116,7 @@ export const DspNode = memo(function DspNode({ data, selected }: NodeProps<DspRF
   const runtimeError = useNodeError(liveNode);
   const primaries = def.params.filter((p) => p.primary);
   const isAnalyzer = def.category === 'analyze';
+  const hasSlider = primaries.some((p) => p.control === 'slider' && p.type === 'number');
   const portCount = Math.max(def.inputs.length, def.outputs.length);
   const minHeight = PORT_TOP + Math.max(0, portCount - 1) * PORT_SPACING + 16;
 
@@ -123,7 +124,7 @@ export const DspNode = memo(function DspNode({ data, selected }: NodeProps<DspRF
     <div
       className={`dsp-node${selected ? ' selected' : ''}${runtimeError ? ' has-error' : ''}`}
       data-cat={def.category}
-      style={{ minHeight, width: isAnalyzer ? 330 : undefined }}
+      style={{ minHeight, width: isAnalyzer ? 330 : hasSlider ? 215 : undefined }}
     >
       <div className="dsp-node-head">
         <span className="cat-band" aria-hidden />

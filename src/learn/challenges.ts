@@ -8,13 +8,7 @@
 import type { Challenge, GradeCtx, GradePart, GradeResult } from './types';
 import { ln, le, lproject } from './lessonUtils';
 import { computeSpectrum } from '@/engine/dsp/fft';
-import {
-  computeStats,
-  maxCorrelation,
-  bandRms,
-  thdEstimate,
-  spectralSimilarity,
-} from '@/engine/dsp/measurements';
+import { computeStats, maxCorrelation, bandRms, thdEstimate } from '@/engine/dsp/measurements';
 import { runCapture } from '@/engine/capture';
 
 const SR = 48000;
@@ -47,8 +41,11 @@ function finish(parts: GradePart[], passScore: number, failMessage: string): Gra
 }
 
 function needOut(ctx: GradeCtx): { out: Float32Array | null; missing: GradeResult | null } {
+  // Grade the signal ARRIVING at the Audio Output (before its level trim),
+  // so the output volume knob does not skew measurements.
   const outId = ctx.nodeOfType('out.audio');
-  const out = outId ? ctx.buffer(outId) : null;
+  const feed = outId ? ctx.graph.edges.find((e) => e.to === outId && e.toPort === 'in') : null;
+  const out = feed ? ctx.buffer(feed.from) : outId ? ctx.buffer(outId) : null;
   if (!out || out.length < 4096) {
     return {
       out: null,
@@ -118,7 +115,13 @@ export const challengeRescue: Challenge = {
     const snr = stats.snrEstimateDb ?? -20;
     const toneAmp = ampAt(out!, 1000, ctx.sampleRate, SETTLE);
     const parts = [
-      part('SNR ≥ 15 dB', `measured ${snr.toFixed(1)} dB`, snr >= 15, Math.min(40, Math.max(0, (snr / 15) * 40)), 40),
+      part(
+        'SNR ≥ 15 dB',
+        `measured ${snr.toFixed(1)} dB (unfiltered input measures ~3 dB)`,
+        snr >= 15,
+        Math.min(40, Math.max(0, ((snr - 4) / 11) * 40)),
+        40,
+      ),
       part(
         'Tone preserved (≥ 0.12 amplitude at 1 kHz)',
         `measured ${toneAmp.toFixed(3)} (source contributes 0.30)`,
@@ -245,9 +248,9 @@ export const challengeClipping: Challenge = {
     const stats = computeStats(seg, ctx.sampleRate);
     const thd = thdEstimate(seg, ctx.sampleRate, 500) ?? 1;
     const parts = [
-      part('Clipping < 0.1%', `measured ${stats.clippingPct.toFixed(2)}%`, stats.clippingPct < 0.1, stats.clippingPct < 0.1 ? 40 : Math.max(0, 40 - stats.clippingPct * 4), 40),
-      part('Distortion (THD) < 5%', `measured ${(thd * 100).toFixed(1)}%`, thd < 0.05, thd < 0.05 ? 25 : Math.max(0, 25 - thd * 100), 25),
-      part('Healthy level: RMS ≥ 0.25', `measured ${stats.rms.toFixed(3)}`, stats.rms >= 0.25, Math.min(25, (stats.rms / 0.25) * 25), 25),
+      part('Clipping < 0.1%', `measured ${stats.clippingPct.toFixed(2)}%`, stats.clippingPct < 0.1, stats.clippingPct < 0.1 ? 35 : Math.max(0, 35 - stats.clippingPct * 4), 35),
+      part('Distortion (THD) < 5%', `measured ${(thd * 100).toFixed(1)}%`, thd < 0.05, thd < 0.05 ? 20 : Math.max(0, 20 - thd * 100), 20),
+      part('Healthy level: RMS ≥ 0.25', `measured ${stats.rms.toFixed(3)}`, stats.rms >= 0.25, Math.min(35, (stats.rms / 0.25) * 35), 35),
       part('Efficiency: ≤ 7 modules', `${ctx.nodeCount} modules`, ctx.nodeCount <= 7, ctx.nodeCount <= 7 ? 10 : 4, 10),
     ];
     return finish(parts, 70, 'The signal must fit under the ±1.0 ceiling before the converter — attenuate, but not so much that the level dies.');
@@ -561,21 +564,44 @@ export const challengeMystery: Challenge = {
   grade: (ctx) => {
     const { out, missing } = needOut(ctx);
     if (missing) return missing;
-    const ref = mysteryReference(ctx.buffer(ctx.nodeOfType('out.audio')!)!.length / ctx.sampleRate, 1808);
+    const ref = mysteryReference(out!.length / ctx.sampleRate, 1808);
     const n = Math.min(ref.length, out!.length);
-    const corr = maxCorrelation(ref.subarray(0, n), out!.subarray(0, n), 100);
-    const sim = spectralSimilarity(ref.subarray(0, n), out!.subarray(0, n), ctx.sampleRate);
-    let refE = 0;
-    let outE = 0;
-    for (let i = 0; i < n; i++) {
-      refE += ref[i] * ref[i];
-      outE += out![i] * out![i];
+    // Compare the echo TAIL separately from the direct impulse — otherwise a
+    // bare wire (direct impulse only) would correlate deceptively well.
+    const tailStart = Math.min(n - 1, Math.round(0.05 * ctx.sampleRate) + 1000);
+    const refTail = ref.subarray(tailStart, n);
+    const outTail = out!.subarray(tailStart, n);
+    const tailCorr = maxCorrelation(refTail, outTail, 100);
+    const fullCorr = maxCorrelation(ref.subarray(0, n), out!.subarray(0, n), 100);
+    let refTailE = 0;
+    let outTailE = 0;
+    for (let i = 0; i < refTail.length; i++) {
+      refTailE += refTail[i] * refTail[i];
+      outTailE += outTail[i] * outTail[i];
     }
-    const energyDb = 10 * Math.log10(Math.max(1e-12, outE) / Math.max(1e-12, refE));
+    const tailDb = 10 * Math.log10(Math.max(1e-12, outTailE) / Math.max(1e-12, refTailE));
     const parts = [
-      part('Impulse response matches (corr ≥ 0.85)', `correlation ${corr.toFixed(3)}`, corr >= 0.85, Math.min(50, Math.max(0, corr) * 55), 50),
-      part('Frequency response matches (similarity ≥ 0.9)', `similarity ${sim.toFixed(3)}`, sim >= 0.9, Math.min(30, Math.max(0, sim) * 32), 30),
-      part('Overall energy within ±3 dB', `${energyDb >= 0 ? '+' : ''}${energyDb.toFixed(1)} dB`, Math.abs(energyDb) <= 3, Math.abs(energyDb) <= 3 ? 20 : Math.max(0, 20 - Math.abs(energyDb) * 3), 20),
+      part(
+        'Echo pattern matches (tail corr ≥ 0.9)',
+        `tail correlation ${tailCorr.toFixed(3)}`,
+        tailCorr >= 0.9,
+        Math.min(50, Math.max(0, tailCorr) * 52),
+        50,
+      ),
+      part(
+        'Echo energy within ±3 dB of the datasheet',
+        `${tailDb >= 0 ? '+' : ''}${tailDb.toFixed(1)} dB`,
+        Math.abs(tailDb) <= 3,
+        Math.abs(tailDb) <= 3 ? 30 : Math.max(0, 30 - Math.abs(tailDb) * 2),
+        30,
+      ),
+      part(
+        'Full response matches (corr ≥ 0.9)',
+        `correlation ${fullCorr.toFixed(3)}`,
+        fullCorr >= 0.9,
+        fullCorr >= 0.9 ? 20 : Math.max(0, (fullCorr - 0.5) * 25),
+        20,
+      ),
     ];
     return finish(parts, 70, 'Read the datasheet numbers literally: repeat spacing = delay time, repeat ratio = feedback gain, fully wet mix.');
   },

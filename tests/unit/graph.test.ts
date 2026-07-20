@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { node, edge, graph, render } from './helpers';
+import { node, edge, graph } from './helpers';
 import { checkConnection, topologicalOrder, validateGraph, signalPathLabel } from '@/engine/graph';
 import { runCapture } from '@/engine/capture';
 

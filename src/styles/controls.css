@@ -1,0 +1,280 @@
+/* Tactile controls: knobs, faders, toggles, jacks */
+
+/* ---------- Rotary knob ---------- */
+
+.knob-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 52px;
+  user-select: none;
+}
+
+.knob {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #454e5a, #23272e 62%, #191c21);
+  border: 1px solid #10131a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.55), 0 1px 0 var(--bevel-hi) inset;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.knob:focus-visible {
+  outline: 2px solid var(--sig-process);
+  outline-offset: 2px;
+}
+
+.knob .pointer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 14px;
+  margin-left: -1px;
+  background: var(--sig-analyze);
+  border-radius: 1px;
+  transform-origin: 50% 100%;
+  transform: translateY(-100%) rotate(0deg);
+  box-shadow: 0 0 4px rgba(67, 224, 138, 0.5);
+}
+
+.knob-wrap.control-color .knob .pointer {
+  background: var(--sig-control);
+  box-shadow: 0 0 4px rgba(217, 135, 255, 0.5);
+}
+
+.knob-ticks {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.knob-ticks i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 4px;
+  margin-left: -0.5px;
+  background: var(--text-faint);
+  transform-origin: 50% 24px;
+}
+
+.knob-label {
+  font-family: var(--font-head);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--label);
+  text-align: center;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knob-value {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--sig-analyze);
+  background: var(--panel-inset);
+  border-radius: 2px;
+  box-shadow: var(--shadow-inset);
+  padding: 0 4px;
+  max-width: 62px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---------- Compact horizontal slider ---------- */
+
+.hslider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.hslider-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hslider-label {
+  font-family: var(--font-head);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--label);
+  flex: none;
+  width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hslider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  background: linear-gradient(180deg, #0c0f13, #171b21);
+  border-radius: 2px;
+  border: 1px solid #0a0d11;
+  box-shadow: var(--shadow-inset);
+  cursor: ew-resize;
+  min-width: 40px;
+}
+
+.hslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 9px;
+  height: 16px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #59636f, #333a44);
+  border: 1px solid #14181d;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+}
+
+.hslider::-moz-range-thumb {
+  width: 9px;
+  height: 16px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #59636f, #333a44);
+  border: 1px solid #14181d;
+}
+
+.hslider-value {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--sig-analyze);
+  min-width: 46px;
+  text-align: right;
+}
+
+/* ---------- Toggle switch (vintage rocker) ---------- */
+
+.toggle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  user-select: none;
+}
+
+.toggle {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--panel-inset);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-inset);
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggle .thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #6a7480, #3b434d);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: left 0.12s ease;
+}
+
+.toggle[aria-checked='true'] {
+  border-color: rgba(67, 224, 138, 0.5);
+}
+
+.toggle[aria-checked='true'] .thumb {
+  left: 15px;
+  background: linear-gradient(180deg, #63f0a3, #2aa564);
+}
+
+/* ---------- Big transport buttons ---------- */
+
+.transport-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 28px;
+  background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--text-dim);
+  box-shadow: 0 1px 0 var(--bevel-hi) inset, 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.transport-btn:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.transport-btn:active {
+  box-shadow: var(--shadow-inset);
+  transform: translateY(1px);
+}
+
+.transport-btn.engaged {
+  color: var(--sig-analyze);
+  background: var(--panel-inset);
+  box-shadow: var(--shadow-inset);
+  border-color: rgba(67, 224, 138, 0.45);
+}
+
+.transport-btn.rec.engaged {
+  color: var(--danger);
+  border-color: rgba(255, 95, 86, 0.5);
+}
+
+.transport-btn svg {
+  display: block;
+}
+
+.transport-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- Segmented mode switch ---------- */
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--panel-inset);
+  box-shadow: var(--shadow-inset);
+}
+
+.segmented button {
+  padding: 4px 12px;
+  font-family: var(--font-head);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-right: 1px solid var(--line-faint);
+}
+
+.segmented button:last-child {
+  border-right: none;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+  color: var(--sig-source);
+  box-shadow: 0 1px 0 var(--bevel-hi) inset;
+}

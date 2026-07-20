@@ -1,0 +1,303 @@
+/* Node canvas + custom node chrome + cables */
+
+.flow-zone {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* Graph paper backdrop */
+.react-flow {
+  background: var(--bench);
+}
+
+.react-flow__attribution {
+  background: transparent;
+  color: var(--text-faint);
+}
+
+.react-flow__attribution a {
+  color: var(--text-faint);
+}
+
+/* ---------- Node module ---------- */
+
+.dsp-node {
+  min-width: 168px;
+  background: linear-gradient(180deg, #272d36 0%, #232830 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-panel);
+  font-size: 11px;
+  position: relative;
+}
+
+.dsp-node.selected {
+  border-color: var(--sig-process);
+  box-shadow: 0 0 0 1px var(--sig-process), 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.dsp-node.has-error {
+  border-color: var(--danger);
+}
+
+.dsp-node-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px 4px;
+  border-bottom: 1px solid var(--line-faint);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent);
+  border-radius: var(--r) var(--r) 0 0;
+  cursor: grab;
+}
+
+.dsp-node-head:active {
+  cursor: grabbing;
+}
+
+.dsp-node-head .cat-band {
+  width: 4px;
+  height: 14px;
+  border-radius: 1px;
+  flex: none;
+}
+
+.dsp-node[data-cat='source'] .cat-band {
+  background: var(--sig-source);
+}
+.dsp-node[data-cat='process'] .cat-band {
+  background: var(--sig-process);
+}
+.dsp-node[data-cat='analyze'] .cat-band {
+  background: var(--sig-analyze);
+}
+.dsp-node[data-cat='output'] .cat-band {
+  background: var(--sig-output);
+}
+
+.dsp-node-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dsp-node-id {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-faint);
+}
+
+.dsp-node-err-led {
+  flex: none;
+}
+
+.dsp-node-body {
+  padding: 8px 9px 9px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.dsp-node-note {
+  width: 100%;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.dsp-node-error {
+  width: 100%;
+  font-size: 10px;
+  color: var(--danger);
+  border-top: 1px dashed rgba(255, 95, 86, 0.4);
+  padding-top: 5px;
+}
+
+/* Analyzer screen inside a node */
+.node-screen {
+  width: 100%;
+  background: var(--panel-inset);
+  border: 1px solid #0a0d11;
+  border-radius: 2px;
+  box-shadow: var(--shadow-inset);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-screen canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.node-screen .screen-tag {
+  position: absolute;
+  bottom: 3px;
+  right: 5px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+/* ---------- Ports / jacks ---------- */
+
+.react-flow__handle.jack {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #3c4550, #12161b 65%);
+  border: 2px solid #566170;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.react-flow__handle.jack.kind-signal {
+  border-color: #6d7988;
+}
+
+.react-flow__handle.jack.kind-control {
+  border-color: var(--sig-control);
+  border-radius: 2px; /* square jack: modulation inputs are visually distinct */
+}
+
+.react-flow__handle.jack.kind-feedback {
+  border-color: var(--sig-source);
+  border-style: dashed;
+}
+
+.react-flow__handle.jack.connectable-ok {
+  box-shadow: 0 0 0 3px rgba(67, 224, 138, 0.35);
+}
+
+.react-flow__handle.jack.connectable-no {
+  opacity: 0.3;
+}
+
+.port-label {
+  position: absolute;
+  font-family: var(--font-head);
+  font-size: 7.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.port-label.in {
+  left: 10px;
+}
+
+.port-label.out {
+  right: 10px;
+}
+
+/* ---------- Cables ---------- */
+
+.react-flow__edge-path {
+  stroke: #6d7988;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--sig-process);
+  stroke-width: 2.5;
+}
+
+.react-flow__edge.cable-control .react-flow__edge-path {
+  stroke: var(--sig-control);
+  stroke-dasharray: 7 3;
+}
+
+.react-flow__edge.cable-feedback .react-flow__edge-path {
+  stroke: var(--sig-source);
+  stroke-dasharray: 3 4;
+}
+
+.react-flow__edge.cable-active .react-flow__edge-path {
+  stroke: #86e3ae;
+  filter: drop-shadow(0 0 3px rgba(67, 224, 138, 0.4));
+}
+
+.react-flow__connection-path {
+  stroke: var(--sig-analyze);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+/* Signal-flow animation along active cables */
+@keyframes cable-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.cable-active.animate-flow .react-flow__edge-path {
+  stroke-dasharray: 6 14;
+  animation: cable-flow 0.7s linear infinite;
+}
+
+/* Controls / minimap */
+.react-flow__controls {
+  box-shadow: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line-faint);
+  fill: var(--text-dim);
+  color: var(--text-dim);
+}
+
+.react-flow__controls-button:hover {
+  background: var(--panel-raised);
+}
+
+.react-flow__minimap {
+  background: var(--panel-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+
+/* Empty state */
+.canvas-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.canvas-empty .inner {
+  text-align: center;
+  color: var(--text-dim);
+  max-width: 420px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r);
+  padding: 26px 30px;
+  background: rgba(27, 31, 36, 0.85);
+  pointer-events: auto;
+}
+
+.canvas-empty h3 {
+  font-family: var(--font-head);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0 0 8px;
+}

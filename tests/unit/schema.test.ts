@@ -55,7 +55,7 @@ describe('Project serialization', () => {
     p.graph.nodes.push({ id: 'x', type: 'future.node', x: 0, y: 0, params: {} });
     p.graph.edges.push({ id: 'e9', from: 'x', fromPort: 'out', to: 'o', toPort: 'in' });
     const r = loadProject(JSON.parse(exportProject(p)));
-    expect(r.ok).toBe(false || r.ok); // still loads
+    expect(r.ok).toBe(true); // still loads despite the unknown node
     expect(r.project!.graph.nodes.find((n) => n.id === 'x')).toBeUndefined();
     expect(r.warnings.some((w) => w.includes('unknown type'))).toBe(true);
     expect(r.warnings.some((w) => w.includes('removed'))).toBe(true);

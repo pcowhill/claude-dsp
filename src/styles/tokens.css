@@ -1,0 +1,78 @@
+/*
+ * Signal Processing Playground — design tokens.
+ * A retro-modern signal laboratory: dark instrument surfaces, warm paper,
+ * phosphor traces, printed labels, calibration marks. Squared panels, no
+ * glassy cards, no big gradients.
+ */
+
+:root {
+  /* Surfaces */
+  --ink: #14171b; /* deepest chassis */
+  --chassis: #1b1f24; /* app frame */
+  --panel: #232830; /* instrument panel */
+  --panel-raised: #2a303a;
+  --panel-inset: #10141a; /* screen/readout wells */
+  --bench: #1e2228; /* canvas backdrop */
+  --paper: #ece5d8; /* lesson paper */
+  --paper-dim: #ddd5c4;
+  --paper-ink: #2b2823;
+
+  /* Lines */
+  --line: #39414d;
+  --line-strong: #4a5462;
+  --line-faint: #2b323b;
+  --grid-line: rgba(120, 144, 156, 0.1);
+  --grid-line-major: rgba(120, 144, 156, 0.18);
+
+  /* Text */
+  --text: #d6dbe3;
+  --text-dim: #8d97a5;
+  --text-faint: #5c6672;
+  --label: #a8b2bf; /* printed panel labels */
+
+  /* Signal / functional colors */
+  --sig-source: #ffb454; /* amber */
+  --sig-process: #56c8ff; /* instrument cyan */
+  --sig-analyze: #43e08a; /* phosphor green */
+  --sig-output: #ff7a76; /* output red-coral */
+  --sig-control: #d987ff; /* modulation violet */
+  --trace: #43e08a; /* scope trace */
+  --trace-b: #ffb454; /* secondary trace */
+  --danger: #ff5f56;
+  --warn: #ffb454;
+  --ok: #43e08a;
+
+  /* LED states */
+  --led-off: #3a4149;
+
+  /* Typography */
+  --font-head: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Consolas', monospace;
+  --font-body:
+    'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+
+  /* Geometry */
+  --r: 3px; /* squared: tiny radius only */
+  --bevel-hi: rgba(255, 255, 255, 0.055);
+  --bevel-lo: rgba(0, 0, 0, 0.45);
+
+  /* Shadows */
+  --shadow-panel: 0 1px 0 var(--bevel-hi) inset, 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-inset: inset 0 2px 6px rgba(0, 0, 0, 0.55), inset 0 -1px 0 var(--bevel-hi);
+
+  /* Z layers */
+  --z-panel: 10;
+  --z-overlay: 100;
+  --z-modal: 1000;
+  --z-toast: 2000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

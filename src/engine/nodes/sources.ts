@@ -82,7 +82,12 @@ function makeOsc(
   description: string,
   shape: (phase: number, params: Record<string, any>) => number,
   extraParams: ParamDef[] = [],
-  mathEq?: { equations: string[]; symbols: Record<string, string>; interpretation: string },
+  mathEq?: {
+    equations: string[];
+    symbols: Record<string, string>;
+    interpretation: string;
+    limitations?: string;
+  },
 ): NodeDef {
   return {
     type,

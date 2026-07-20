@@ -28,7 +28,7 @@ export function designBiquad(
   const cosW = Math.cos(w0);
   const sinW = Math.sin(w0);
   const alpha = sinW / (2 * Math.max(q, 0.01));
-  let b0: number, b1: number, b2: number, a0: number, a1: number, a2: number;
+  let b0: number, b1: number, b2: number;
   switch (kind) {
     case 'lowpass':
       b0 = (1 - cosW) / 2;
@@ -51,9 +51,9 @@ export function designBiquad(
       b2 = 1;
       break;
   }
-  a0 = 1 + alpha;
-  a1 = -2 * cosW;
-  a2 = 1 - alpha;
+  const a0 = 1 + alpha;
+  const a1 = -2 * cosW;
+  const a2 = 1 - alpha;
   return { b0: b0 / a0, b1: b1 / a0, b2: b2 / a0, a1: a1 / a0, a2: a2 / a0 };
 }
 

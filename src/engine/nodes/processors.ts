@@ -3,7 +3,7 @@
  * modulation, delay/feedback and convolution.
  */
 
-import type { NodeDef, ParamDef, ParamValue } from '@/model/types';
+import type { NodeDef, ParamDef } from '@/model/types';
 import { LIMITS } from '@/model/types';
 import { pnum, pstr, pbool, dbToLin } from './helpers';
 import {
